@@ -218,7 +218,7 @@ public class Solver {
     private void printRoutes() {
         for (int i = 0; i < routes.size(); i++) {
             int routeNumber = i + 1;
-            System.out.print("Route " + routeNumber + ": ");
+            System.out.print("Pattern " + routeNumber + ": ");
             for (int j = 0; j < routes.get(i).size(); j++) {
                 System.out.print(routes.get(i).get(j));
             }
