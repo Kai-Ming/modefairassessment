@@ -1,6 +1,34 @@
 
 import java.util.*;
 
+enum Grid {
+    A (0, 0),
+    B (0, 1),
+    C (0, 2),
+    D (1, 0),
+    E (1, 1),
+    F (1, 2),
+    G (2, 0),
+    H (2, 1),
+    I (2, 2);   
+
+    private final int row;
+    private final int col;
+
+    Grid(int row, int col) {
+        this.row = row;
+        this.col = col;
+    }
+
+    public int getRow() {
+        return row;
+    }
+
+    public int getCol() {
+        return col;
+    }
+}
+
 public class Solver {
 
     private static final int gridSize = 3;
@@ -20,7 +48,7 @@ public class Solver {
         String str3 = scan.next().toUpperCase();
 
         Solver solve = new Solver(str1, str2, str3);
-        solve.DFSSolve(Grid.valueOf(str1).getRow(), Grid.valueOf(str1).getCol(), new ArrayList<String>(), 0);
+        solve.DFSSolve(Grid.valueOf(str1).getRow(), Grid.valueOf(str1).getCol(), new ArrayList<String>(), 0, false);
         solve.printRoutes();
     }
 
@@ -31,26 +59,39 @@ public class Solver {
         this.routes = new ArrayList<ArrayList<String>>();
     }
 
-    private void DFSSolve(int row, int col, ArrayList<String> currentRoute, int pointsAdded) {
+    private void DFSSolve(int row, int col, ArrayList<String> currentRoute, int pointsAdded, boolean centreAdded) {
+        ArrayList<String> newCurrentRoute = new ArrayList<String>();
+        for (int i = 0; i < currentRoute.size(); i++) {
+            newCurrentRoute.add(currentRoute.get(i));
+        }
+        currentRoute = newCurrentRoute;
         currentRoute.add(grid[row][col]);
+
         if (grid[row][col].equals(first) || grid[row][col].equals(second)) {
             pointsAdded++;
         }
         if (grid[row][col].equals(third)) {
-            System.out.println("terminate route");
-            printRoute(currentRoute);
             routes.add(currentRoute);
             return;
         }
 
+        if (col == 1 && row == 1) {
+            centreAdded = true;
+        }
+
         HashSet<String> sides = getSides(row, col);
-        HashSet<String> corners = getCorners(row, col);
+        HashSet<String> diagonals = getCorners(row, col, 1);
         HashSet<String> lCorners = getLCorners(row, col); 
+        HashSet<String> corners = getCorners(row, col, 2);
+        
         
         HashSet<String> successsor = new HashSet<String>();
         successsor.addAll(sides);
-        successsor.addAll(corners);
+        successsor.addAll(diagonals);
         successsor.addAll(lCorners);
+        if (centreAdded) {
+            successsor.addAll(corners);
+        }
 
         if (pointsAdded < 2) {
             successsor.remove(third);
@@ -63,10 +104,8 @@ public class Solver {
         }
 
         for (String point : successsor) {
-            System.out.println("loop");
-            System.out.println(point);
-            printRoute(currentRoute);
-            DFSSolve(Grid.valueOf(point).getRow(), Grid.valueOf(point).getCol(), currentRoute, pointsAdded);
+            boolean previousCentreAdded = centreAdded;
+            DFSSolve(Grid.valueOf(point).getRow(), Grid.valueOf(point).getCol(), currentRoute, pointsAdded, previousCentreAdded);
         }
     }
     
@@ -91,23 +130,23 @@ public class Solver {
         return sides;
     }
 
-    private HashSet<String> getCorners(int row, int col) {
+    private HashSet<String> getCorners(int row, int col, int dist) {
         HashSet<String> corners = new HashSet<String>();
         // Up right
-        if(isInBounds(row - 1, col + 1)) {
-            corners.add(grid[row - 1][col + 1]);
+        if(isInBounds(row - dist, col + dist)) {
+            corners.add(grid[row - dist][col + dist]);
         }
         // Down right
-        if(isInBounds(row + 1, col + 1)) {
-            corners.add(grid[row + 1][col + 1]);
+        if(isInBounds(row + dist, col + dist)) {
+            corners.add(grid[row + dist][col + dist]);
         }
         // Down left
-        if(isInBounds(row + 1, col - 1)) {
-            corners.add(grid[row + 1][col - 1]);
+        if(isInBounds(row + dist, col - dist)) {
+            corners.add(grid[row + dist][col - dist]);
         }
         // Up left
-        if(isInBounds(row - 1, col - 1)) {
-            corners.add(grid[row - 1][col - 1]);
+        if(isInBounds(row - dist, col - dist)) {
+            corners.add(grid[row - dist][col - dist]);
         }
         return corners;
     }
@@ -151,19 +190,13 @@ public class Solver {
 
     private void printRoutes() {
         for (int i = 0; i < routes.size(); i++) {
+            System.out.print("Route " + i + 1 + ": ");
             for (int j = 0; j < routes.get(i).size(); j++) {
                 System.out.print(routes.get(i).get(j));
             }
             System.out.println();
         }
-        System.out.println(routes.size());
-    }
-
-    private void printRoute(ArrayList<String> route) {
-        for (int i = 0; i < route.size(); i++){
-            System.out.print(route.get(i));
-        }
-        System.out.println();
+        System.out.println("Number of patterns: " + routes.size());
     }
 
     private boolean isInBounds(int row, int col) {
