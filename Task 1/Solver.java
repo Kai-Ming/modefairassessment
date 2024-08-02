@@ -41,15 +41,34 @@ public class Solver {
     private String third;
 
     public static void main(String[] args) {
+        System.out.println("Input an alphabet between A to I");
 
         Scanner scan = new Scanner(System.in);
         String str1 = scan.next().toUpperCase();
+        validateInputRange(str1);
         String str2 = scan.next().toUpperCase();
+        validateInputRange(str2);
         String str3 = scan.next().toUpperCase();
+        validateInputRange(str3);
+        scan.close();
+
+        //Validates if the input is unique
+        if (str1.equals(str3) || str1.equals(str2) || str2.equals(str3)) {
+            throw new java.lang.RuntimeException("Please input unique values");
+        }
 
         Solver solve = new Solver(str1, str2, str3);
         solve.DFSSolve(Grid.valueOf(str1).getRow(), Grid.valueOf(str1).getCol(), new ArrayList<String>(), 0, false);
         solve.printRoutes();
+    }
+
+    private static void validateInputRange(String input) {
+        // Validates if the input is within the alphabet range
+        try {
+            Grid validate = Grid.valueOf(input);
+        } catch (IllegalArgumentException e) {
+            throw new java.lang.RuntimeException("Please input a value between A to I");
+        }
     }
 
     public Solver(String first, String second, String third) {
@@ -68,23 +87,28 @@ public class Solver {
         currentRoute.add(grid[row][col]);
 
         if (grid[row][col].equals(first) || grid[row][col].equals(second)) {
+            // Added another point
             pointsAdded++;
         }
+
         if (grid[row][col].equals(third)) {
+            // Reached end of pattern
             routes.add(currentRoute);
             return;
         }
 
         if (col == 1 && row == 1) {
+            // Added the centre point
             centreAdded = true;
         }
 
+        // Get all possible points reachable from current point
         HashSet<String> sides = getSides(row, col);
         HashSet<String> diagonals = getCorners(row, col, 1);
         HashSet<String> lCorners = getLCorners(row, col); 
         HashSet<String> corners = getCorners(row, col, 2);
         
-        
+        // Add the possible points from current point
         HashSet<String> successsor = new HashSet<String>();
         successsor.addAll(sides);
         successsor.addAll(diagonals);
@@ -93,16 +117,19 @@ public class Solver {
             successsor.addAll(corners);
         }
 
+        // Remove the final point if all the others are not added yet
         if (pointsAdded < 2) {
             successsor.remove(third);
         }
 
+        // Remove any visited points
         for (int i = 0; i < currentRoute.size(); i++) {
             if (successsor.contains(currentRoute.get(i))) {
                 successsor.remove(currentRoute.get(i));
             }
         }
 
+        // Perform the DFS
         for (String point : successsor) {
             boolean previousCentreAdded = centreAdded;
             DFSSolve(Grid.valueOf(point).getRow(), Grid.valueOf(point).getCol(), currentRoute, pointsAdded, previousCentreAdded);
@@ -190,7 +217,8 @@ public class Solver {
 
     private void printRoutes() {
         for (int i = 0; i < routes.size(); i++) {
-            System.out.print("Route " + i + 1 + ": ");
+            int routeNumber = i + 1;
+            System.out.print("Route " + routeNumber + ": ");
             for (int j = 0; j < routes.get(i).size(); j++) {
                 System.out.print(routes.get(i).get(j));
             }
