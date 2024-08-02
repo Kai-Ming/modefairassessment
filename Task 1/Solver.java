@@ -222,8 +222,9 @@ public class Solver {
             for (int j = 0; j < routes.get(i).size(); j++) {
                 System.out.print(routes.get(i).get(j));
             }
-            System.out.println();
+            System.out.print(", ");
         }
+        System.out.println();
         System.out.println("Number of patterns: " + routes.size());
     }
 

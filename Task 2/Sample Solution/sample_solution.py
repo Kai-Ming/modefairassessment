@@ -201,12 +201,6 @@ class MVPGeneticAlgorithm(GeneticAlgorithm):
         self.cars = cars
         self.custs = custs
         self.dist_matrix = self._generate_dist_matrix(depot, custs, len(cars))
-        print("init")
-        print(self.car_types)
-        print(self.cars)
-        print(self.custs)
-        print(self.dist_matrix)
-        print("end init")
         super().__init__(*kwargs)
 
     def _generate_dist_matrix(self, depot, custs, num_cars):
@@ -259,7 +253,7 @@ class MVPGeneticAlgorithm(GeneticAlgorithm):
             The individual in a population, it should be a sequence of customer/ car id.
         """
         for first_id in range(1, len(individual) - 1): #ensure not to mutate the first and last point to maintain validity
-            if random.random() < 0.2: 
+            if random.random() < 0.11: 
                 sec_id = random.randint(1, len(individual) - 2)
                 individual[first_id], individual[sec_id] = individual[sec_id], individual[first_id]
         return individual
@@ -462,12 +456,12 @@ start_time = time.time()
 car_types, depot, custs = load_problem(sample_test['path'])
 num_cars = len(custs) * 2
 cars = [{"id": len(custs) + i + 1, "type": i // int(num_cars / 2)} for i in range(num_cars)]
-POP_SIZE = 10
-SELECTION_SIZE = 4
-ELITE_SIZE = 5
-NUM_GENS = 20
-MUTATION_RATE = 0.9
-CROSSOVER_RATE = 0.1
+POP_SIZE = 500
+SELECTION_SIZE = 200
+ELITE_SIZE = 120
+NUM_GENS = 20000000
+MUTATION_RATE = 0.97
+CROSSOVER_RATE = 0.91
 NUM_PTS = num_cars + len(custs)
 
 ga = MVPGeneticAlgorithm(
